@@ -1,0 +1,54 @@
+# ChipTuner Assistant config
+
+# Пароль к защищённым .7z и путь к zip-архиву — для скриптов распаковки/каталогизации
+# (src/unpack.py, src/catalog.py, extract_7z.py). Оставь пустыми, если не используешь их.
+# Пароль можно также задать через переменную окружения CHIPTUNER_ARCHIVE_PW.
+archive_password: ""
+archive_zip: ""
+
+# Где лежат распакованные документы (pdf/doc/txt), по которым строится поиск.
+# Укажи свои папки.
+docs_dirs:
+  - "F:/filat/_unpacked/spravochnik"     # Чем/Как прошить — справочник (919 pdf)
+  - "F:/filat/_unpacked/encyclopedia"            # Большая энциклопедия (153 незашифр. pdf)
+  - "F:/filat/_unpacked/encyclopedia_decrypted"  # 504 расшифрованных PDF (снят Adobe PubSec DRM)
+  - "F:/filat/_unpacked/vag"             # Мануалы VAG
+  - "F:/filat/_unpacked/kess_ktag"       # материалы Kess/Ktag
+  - "F:/filat/_unpacked/secrets"         # бизнес-курс СТО
+  # прочее (firmware/exe) для RAG не нужно; ingest сам берёт только pdf/doc/txt/...
+
+# Куда складывать индекс (векторную БД) и кэш.
+data_dir: "F:/filat/chiptuner/_data"
+
+# Embeddings (локально, CPU). multilingual-e5-small = быстро+хорошо для русского.
+# Альтернатива качественнее, но тяжелее: intfloat/multilingual-e5-base
+embedding_model: "intfloat/multilingual-e5-small"
+
+# Разбивка текста
+chunk_chars: 1200        # размер чанка (символы)
+chunk_overlap: 200       # перекрытие
+
+# LM Studio (OpenAI-совместимый сервер). Включи Local Server в LM Studio (вкладка Developer).
+lmstudio:
+  base_url: "http://localhost:1234/v1"
+  # ВАЖНО: gemma-4-* — reasoning-модели: тратят весь бюджет токенов на скрытые
+  # размышления, content пустой + медленно (~5 ток/с на Arc). Для интерактива
+  # используем обычную instruct-модель. Качество ответов на русском хорошее.
+  # lfm2.5-1.2b — самая быстрая на Intel Arc (первый токен ~2с, ~49 ток/с против 28с/14
+  # у ministral-3-3b). Для качества посложнее — верни "mistralai/ministral-3-3b".
+  model: "liquid/lfm2.5-1.2b"
+  temperature: 0.2
+  max_tokens: 900
+  # Отключить скрытые "размышления" у reasoning-моделей (gemma-4, QwQ, R1) —
+  # экономит время, ответ сразу. LM Studio понимает: none|low|medium|high.
+  # none = быстрее всего. Для instruct-моделей (ministral) параметр игнорируется.
+  reasoning_effort: none
+
+# Сколько фрагментов подмешивать в ответ
+top_k: 6
+
+# Бюджет символов контекста (склейка фрагментов). Чтобы промпт влез в n_ctx модели
+# в LM Studio. При n_ctx=4096 держи ~3500. Если грузишь модель с контекстом 8k+ —
+# можно поднять до 6000-8000 (ответы полнее). Ошибка "tokens to keep > context length"
+# = слишком большой контекст: уменьши это число ИЛИ увеличь n_ctx при загрузке модели.
+max_context_chars: 3500

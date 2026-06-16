@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Данные: индекс, БД, кэш — НЕ публикуем (строится локально из твоих документов)
+_data/
+*.db
+*.sqlite3
+*.sqlite
+chroma/
+
+# Локальные/временные
+*.log
+_work/
+_unpacked/
+
+# ОС
+.DS_Store
+Thumbs.db
+
+# Локальные оверрайды настроек
+config.local.yaml
